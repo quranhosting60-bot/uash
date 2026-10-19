@@ -5,6 +5,30 @@ import { money } from "@/lib/products";
 const EMPTY = { id: "", name: "", category: "Women", sub: "", price: "", was: "", tag: "", sizes: "", desc: "" };
 const photo = (p) => p.image || `/products/${p.id}.jpg`;
 
+// Shrinks the photo in the browser before upload. Vercel rejects requests bigger than ~4.5 MB,
+// and phone photos are often 5-12 MB, so without this the save silently failed on the live site.
+async function shrink(file, maxW = 1000, maxH = 1400) {
+  try {
+    const bmp = await createImageBitmap(file, { imageOrientation: "from-image" });
+    const k = Math.min(1, maxW / bmp.width, maxH / bmp.height);
+    const c = document.createElement("canvas");
+    c.width = Math.round(bmp.width * k); c.height = Math.round(bmp.height * k);
+    const ctx = c.getContext("2d");
+    ctx.fillStyle = "#fff"; ctx.fillRect(0, 0, c.width, c.height);
+    ctx.drawImage(bmp, 0, 0, c.width, c.height);
+    const blob = await new Promise((res) => c.toBlob(res, "image/jpeg", 0.82));
+    if (blob && blob.size < file.size) return new File([blob], "photo.jpg", { type: "image/jpeg" });
+  } catch { /* fall back to the original file */ }
+  return file;
+}
+// Always returns a readable message, even if the server sends HTML instead of JSON.
+async function readReply(r) {
+  const text = await r.text();
+  try { return JSON.parse(text); } catch {}
+  if (r.status === 413) return { error: "Photo is too large for the server. Choose a smaller photo." };
+  return { error: `Server error (${r.status}). ${text.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim().slice(0, 160)}` };
+}
+
 export default function Admin() {
   const [state, setState] = useState("loading"); // loading | login | disabled | ready
   const [products, setProducts] = useState([]);
@@ -18,20 +42,26 @@ export default function Admin() {
   const [q, setQ] = useState("");
 
   async function load() {
-    const r = await fetch("/api/admin/products", { cache: "no-store" });
-    if (r.status === 503) return setState("disabled");
-    if (r.status === 401) return setState("login");
-    const d = await r.json();
-    setProducts(d.products); setCats(d.categories); setStorage(d.storage); setState("ready");
+    try {
+      const r = await fetch("/api/admin/products", { cache: "no-store" });
+      if (r.status === 503) return setState("disabled");
+      if (r.status === 401) return setState("login");
+      const d = await readReply(r);
+      if (!r.ok) { setErr(d.error || "Could not load products."); return setState("login"); }
+      setProducts(d.products); setCats(d.categories); setStorage(d.storage); setState("ready");
+    } catch { setErr("Could not reach the server."); setState("login"); }
   }
   useEffect(() => { load(); }, []);
 
   async function login(e) {
     e.preventDefault(); setErr(""); setBusy(true);
-    const r = await fetch("/api/admin/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: pw }) });
-    const d = await r.json(); setBusy(false);
-    if (!r.ok) return setErr(d.error || "Login failed.");
-    setPw(""); load();
+    try {
+      const r = await fetch("/api/admin/login", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ password: pw }) });
+      const d = await readReply(r);
+      if (!r.ok) return setErr(d.error || "Login failed.");
+      setPw(""); load();
+    } catch { setErr("Could not reach the server."); }
+    finally { setBusy(false); }
   }
   async function logout() { await fetch("/api/admin/login", { method: "DELETE" }); setState("login"); }
 
@@ -43,18 +73,23 @@ export default function Admin() {
 
   async function save(e) {
     e.preventDefault(); setErr(""); setBusy(true);
-    const fd = new FormData();
-    ["id", "name", "category", "sub", "price", "was", "tag", "sizes", "desc"].forEach((k) => fd.append(k, form[k] ?? ""));
-    if (file) fd.append("image", file);
-    const r = await fetch("/api/admin/products", { method: "POST", body: fd });
-    const d = await r.json(); setBusy(false);
-    if (!r.ok) return setErr(d.error || "Could not save.");
-    setForm(null); setFile(null); load();
+    try {
+      const fd = new FormData();
+      ["id", "name", "category", "sub", "price", "was", "tag", "sizes", "desc"].forEach((k) => fd.append(k, form[k] ?? ""));
+      if (file) fd.append("image", await shrink(file));
+      const r = await fetch("/api/admin/products", { method: "POST", body: fd });
+      const d = await readReply(r);
+      if (!r.ok) return setErr(d.error || "Could not save.");
+      setForm(null); setFile(null); load();
+    } catch (x) { setErr("Could not save: " + (x?.message || "network error")); }
+    finally { setBusy(false); } // the button never stays stuck on "Saving..."
   }
   async function del(p) {
     if (!confirm(`Delete "${p.name}"? This cannot be undone.`)) return;
-    const r = await fetch(`/api/admin/products?id=${p.id}`, { method: "DELETE" });
-    if (r.ok) load(); else alert((await r.json()).error || "Could not delete.");
+    try {
+      const r = await fetch(`/api/admin/products?id=${p.id}`, { method: "DELETE" });
+      if (r.ok) load(); else alert((await readReply(r)).error || "Could not delete.");
+    } catch { alert("Could not reach the server."); }
   }
 
   if (state === "loading") return <main className="adm"><p>Loading…</p></main>;

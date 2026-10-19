@@ -1,7 +1,7 @@
 import "./globals.css";
-import { Jost, Inter } from "next/font/google";
+import { Cormorant_Garamond, Inter } from "next/font/google";
 
-const head = Jost({ subsets: ["latin"], weight: ["400", "500", "600"], variable: "--f-head" });
+const head = Cormorant_Garamond({ subsets: ["latin"], weight: ["400", "500", "600", "700"], variable: "--f-head" });
 const body = Inter({ subsets: ["latin"], variable: "--f-body" });
 
 export const metadata = {

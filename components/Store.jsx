@@ -16,6 +16,7 @@ const Pic = ({ p, children }) => (
     <Icon c={p.category} />
     <img src={p.image || `/products/${p.id}.jpg`} alt={p.name} loading="lazy" onError={(e) => { e.currentTarget.style.display = "none"; }} />
     {children}
+    <span className="qv" aria-hidden="true">Quick view</span>
   </div>
 );
 const hide = (e) => { e.currentTarget.style.display = "none"; };

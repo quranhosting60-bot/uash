@@ -2,6 +2,9 @@ import { isAdmin, adminEnabled } from "@/lib/auth";
 import { getProducts, saveProducts, saveImage, removeImage, storageMode } from "@/lib/db";
 import { SHOP } from "@/lib/products";
 
+export const runtime = "nodejs";
+export const maxDuration = 30;
+
 const deny = () =>
   adminEnabled() ? Response.json({ error: "Please log in." }, { status: 401 }) : Response.json({ error: "Admin is disabled." }, { status: 503 });
 const bad = (error) => Response.json({ error }, { status: 400 });
@@ -32,7 +35,8 @@ export async function POST(req) {
   if (was && was <= price) return bad("The old price must be higher than the price.");
   if (!["", "new", "sale"].includes(tag)) return bad("Invalid label.");
 
-  const products = await getProducts();
+  let products;
+  try { products = await getProducts(); } catch (e) { return bad("Could not read products: " + e.message); }
   const id = Number(f.get("id")) || 0;
   const old = id ? products.find((p) => p.id === id) : null;
   if (id && !old) return bad("Product not found.");
