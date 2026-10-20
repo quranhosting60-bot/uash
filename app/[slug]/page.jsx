@@ -18,7 +18,7 @@ export default async function Page({ params }) {
   if (!p) notFound();
   return (
     <main className="wrap legal">
-      <Link href="/">← Back to Falestix</Link>
+      <Link href="/">← Back to UASH</Link>
       <h1>{p[0]}</h1>
       <p>{p[1]}</p>
     </main>

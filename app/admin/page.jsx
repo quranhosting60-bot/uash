@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { money } from "@/lib/products";
 
-const EMPTY = { id: "", name: "", category: "Women", sub: "", price: "", was: "", tag: "", sizes: "", desc: "" };
+const EMPTY = { id: "", name: "", category: "Luxury", sub: "", price: "", was: "", tag: "", sizes: "", desc: "" };
 const photo = (p) => p.image || `/products/${p.id}.jpg`;
 
 // Shrinks the photo in the browser before upload. Vercel rejects requests bigger than ~4.5 MB,
@@ -96,7 +96,7 @@ export default function Admin() {
   if (state === "disabled") return <main className="adm"><div className="adm-box"><h1>Admin is turned off</h1><p>Set an <b>ADMIN_PASSWORD</b> (at least 8 characters) in your environment settings, then reload this page.</p></div></main>;
   if (state === "login") return (
     <main className="adm"><form className="adm-box" onSubmit={login}>
-      <h1>Falestix admin</h1>
+      <h1>UASH admin</h1>
       <label htmlFor="pw">Password</label>
       <input id="pw" type="password" autoComplete="current-password" value={pw} onChange={(e) => setPw(e.target.value)} autoFocus />
       {err && <p className="err" role="alert">{err}</p>}

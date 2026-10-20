@@ -1,33 +1,5 @@
-Photo file names = product id. Files that exist are shown on the website automatically.
+Photo file names = product id. Files that exist are shown automatically.
 Portrait photos, about 800 x 1100 px, JPG.
+Products you add from /admin upload their own photo, so this list only matters for the starter products.
 
- 1.jpg   Embroidered Mirror-Work Suit, 3 pieces  (Women)
- 2.jpg   Printed Kurta and Palazzo Set  (Women)
- 3.jpg   Cutwork Embroidered Suit with Dupatta  (Women)
- 4.jpg   Floral Print Suit with Net Sleeves  (Women)
- 5.jpg   Crewneck Sweatshirt  (Men)
- 6.jpg   Long-Sleeve Polo Shirt  (Men)
- 7.jpg   Open-Front Cardigan  (Men)
- 8.jpg   Printed Polo Shirt  (Men)
- 9.jpg   Boys' Cotton T-Shirt Set, 3 pieces  (Kids)
-10.jpg   Girls' Printed Frock  (Kids)
-11.jpg   Baby Romper Set  (Kids)
-12.jpg   Ceramic Dinner Plate and Bowl Set  (Kitchenware)
-13.jpg   White Ceramic Bowl and Jug Set  (Kitchenware)
-14.jpg   Leaf-Glaze Ceramic Bowls, Set of 4  (Kitchenware)
-15.jpg   Silicone Cooking Utensil Set, 8 pieces  (Kitchenware)
-16.jpg   Wooden Spoons and Chopping Board Set  (Kitchenware)
-17.jpg   Ceramic Tea Cup Set, 6 pieces  (Kitchenware)
-18.jpg   Assorted Ceramic Mugs, Set of 6  (Kitchenware)
-19.jpg   Ceramic Mug Set with Wooden Stand  (Kitchenware)
-20.jpg   Handmade Stoneware Set  (Kitchenware)
-21.jpg   Checked Cotton Bed Linen, King Size  (Home)
-22.jpg   Cotton Bath Towel, Set of 3  (Home)
-23.jpg   Textured Cushion Covers, Set of 2  (Home)
-24.jpg   Satin Stripe Bed Linen, King Size  (Home)
-25.jpg   Striped Terry Towels, Set of 4  (Home)
-26.jpg   Knot Cushion and Decorative Cushions  (Home)
-27.jpg   Woven Striped Cushion Covers, Set of 3  (Home)
-28.jpg   Plush Sofa Throw, Cream  (Home)
-29.jpg   Plush Sofa Throw, Green  (Home)
-30.jpg   Cotton Crewneck T-Shirt  (Men)
+12-20 Kitchenware | 21,22,24,25,28,29 Luxury | 23,26,27 Decor

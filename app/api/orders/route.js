@@ -21,7 +21,7 @@ export async function POST(req) {
   if (!lines.length) return Response.json({ error: "Your cart is empty." }, { status: 400 });
 
   const t = totals(lines);
-  const id = "FX-" + Date.now().toString(36).toUpperCase();
+  const id = "UA-" + Date.now().toString(36).toUpperCase();
   const summary = [
     `Order ${id} (Cash on Delivery)`,
     ...lines.map((l) => `${l.qty} x ${l.name}${l.size ? " (size " + l.size + ")" : ""} - ${money(l.price * l.qty)}`),
@@ -32,6 +32,18 @@ export async function POST(req) {
   ].filter(Boolean).join("\n");
 
   console.log(summary); // visible in your hosting logs
+
+  // Optional: sends the order to the shop's WhatsApp automatically (free CallMeBot service).
+  // Needs CALLMEBOT_APIKEY in the environment settings. Failures never block the order.
+  if (process.env.CALLMEBOT_APIKEY) {
+    try {
+      const u = new URL("https://api.callmebot.com/whatsapp.php");
+      u.searchParams.set("phone", "+" + (process.env.CALLMEBOT_PHONE || SHOP.whatsapp));
+      u.searchParams.set("text", summary);
+      u.searchParams.set("apikey", process.env.CALLMEBOT_APIKEY);
+      await fetch(u, { signal: AbortSignal.timeout(6000) });
+    } catch (e) { console.error("WhatsApp notify failed:", e.message); }
+  }
 
   if (process.env.RESEND_API_KEY && process.env.ORDER_EMAIL_TO) {
     const send = (to, subject, text) =>

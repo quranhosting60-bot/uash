@@ -4,12 +4,17 @@ import { SHOP, money, totals } from "@/lib/products";
 
 const EMPTY = { name: "", phone: "", city: "", street: "", email: "", note: "" };
 const ICON = {
-  Women: <path d="M9 3h6l1 5-2 3 4 10H6l4-10-2-3z" />,
-  Men: <path d="M8 3 3 6l2 4 3-1v12h8V9l3 1 2-4-5-3a4 4 0 0 1-8 0z" />,
-  Kids: <path d="M8 3c0 2 8 2 8 0l4 3-2 4-2-1v4l1 6h-3l-2-4-2 4H7l1-6v-4l-2 1-2-4z" />,
+  Luxury: <><path d="M6 3h12l4 6-10 12L2 9z" /><path d="M2 9h20M9 3l-1 6 4 12 4-12-1-6" /></>,
+  Decor: <><path d="M9 3h6M10 3v3c0 2-4 3-4 8a6 6 0 0 0 12 0c0-5-4-6-4-8V3" /><path d="M8 21h8" /></>,
   Kitchenware: <><path d="M4 10h16v7a3 3 0 0 1-3 3H7a3 3 0 0 1-3-3z" /><path d="M2 10h2M20 10h2M9 6.5c0-1.2 1-1.2 1-2.5M14 6.5c0-1.2 1-1.2 1-2.5" /></>,
-  Home: <><path d="M3 19V6M3 15h18v4M21 15v-3a3 3 0 0 0-3-3h-7v6" /><circle cx="7" cy="11" r="2" /></>,
 };
+const TI = {
+  cod: <><rect x="3" y="6" width="18" height="12" rx="1.5" /><circle cx="12" cy="12" r="2.6" /></>,
+  ship: <><path d="M2 6h11v10H2zM13 9h4.5L21 12.5V16h-8" /><circle cx="6.5" cy="17.5" r="1.8" /><circle cx="17" cy="17.5" r="1.8" /></>,
+  swap: <><path d="M4 8h13l-3-3M20 16H7l3 3" /></>,
+  pin: <><path d="M12 21s7-6.2 7-11.5A7 7 0 0 0 5 9.5C5 14.800 12 21 12 21z" /><circle cx="12" cy="9.5" r="2.5" /></>,
+};
+const Ti = ({ k }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{TI[k]}</svg>;
 const Icon = ({ c }) => <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="0.9" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">{ICON[c]}</svg>;
 const Pic = ({ p, children }) => (
   <div className={`pic c-${p.category}`}>
@@ -83,6 +88,7 @@ export default function Store({ products }) {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Something went wrong. Please try again.");
       setOrder({ ...data, email: form.email });
+      try { if (SHOP.whatsapp) window.open(`https://wa.me/${SHOP.whatsapp}?text=${encodeURIComponent(data.summary)}`, "_blank", "noopener"); } catch {}
       setCart({}); setConsent(false); setStep("done");
     } catch (err) { setError(err.message); }
     setBusy(false);
@@ -117,7 +123,7 @@ export default function Store({ products }) {
       <header>
         <div className="wrap top">
           <div className="search-wrap"><input className="search" type="search" placeholder="Search products" aria-label="Search products" value={q} onChange={(e) => { setQ(e.target.value); setCat("All"); setSub(""); }} /></div>
-          <a className="logo" href="/">FALESTIX</a>
+          <a className="logo" href="/">{SHOP.name.toUpperCase()}</a>
           <div className="tools"><button className="cartbtn" onClick={() => { setStep("cart"); setOpen(true); }} aria-label={`Open cart, ${count} items`}>Cart<b>{count}</b></button></div>
         </div>
         <div className="msearch"><input className="search" type="search" placeholder="Search products" aria-label="Search products" value={q} onChange={(e) => { setQ(e.target.value); setCat("All"); setSub(""); }} /></div>
@@ -141,22 +147,31 @@ export default function Store({ products }) {
       </header>
 
       <section className="hero" aria-label="Featured collections">
-        <button className="panel big c-Women" onClick={() => go("Women")}><Icon c="Women" /><img className="bg" src="/products/1.jpg" alt="" onError={hide} style={{ objectPosition: "center 15%" }} /><span className="pct">NEW SEASON</span><h2>Women</h2><p>Unstitched, ready to wear and shawls.</p><span className="btn">Shop women</span></button>
-        <button className="panel c-Men" onClick={() => go("Men")}><Icon c="Men" /><img className="bg" src="/products/5.jpg" alt="" onError={hide} style={{ objectPosition: "30% center" }} /><h2>Men</h2><p>Shalwar kameez, shirts and trousers.</p><span className="btn ghost">Shop men</span></button>
-        <button className="panel c-Kitchenware" onClick={() => go("Kitchenware")}><Icon c="Kitchenware" /><img className="bg" src="/products/13.jpg" alt="" onError={hide} /><h2>Kitchenware</h2><p>Dinner sets, cookware, cups and serveware.</p><span className="btn ghost">Shop kitchenware</span></button>
+        {SHOP.categories.map((c, i) => (
+          <button key={c} className={`panel c-${c}${i === 0 ? " big" : ""}`} onClick={() => go(c)}>
+            <Icon c={c} />
+            {repOf(c) && <img className="bg" src={repOf(c)} alt="" onError={hide} />}
+            {i === 0 && <span className="pct">New collection</span>}
+            <h2>{c}</h2><p>{SHOP.info[c].line}</p><span className="btn">{SHOP.info[c].cta}</span>
+          </button>
+        ))}
       </section>
 
       {maxOff > 0 && <div className="sale-banner" id="sale"><b>Sale up to {maxOff}% off</b><a href="#shop" onClick={() => go("All")}>Shop all products</a></div>}
 
       <div className="trust">
-        <div><b>Cash on delivery</b><span>Pay when your parcel arrives</span></div>
-        <div><b>Free delivery</b><span>On orders over {money(SHOP.freeShippingFrom)}</span></div>
-        <div><b>7-day exchange</b><span>On unused items</span></div>
-        <div><b>Nationwide delivery</b><span>All cities of Pakistan</span></div>
+        <div><Ti k="cod" /><div><b>Cash on delivery</b><span>Pay when your parcel arrives</span></div></div>
+        <div><Ti k="ship" /><div><b>Free delivery</b><span>On orders over {money(SHOP.freeShippingFrom)}</span></div></div>
+        <div><Ti k="swap" /><div><b>7-day exchange</b><span>On unused items</span></div></div>
+        <div><Ti k="pin" /><div><b>Nationwide delivery</b><span>All cities of Pakistan</span></div></div>
       </div>
 
       <section className="wrap sec"><div className="head"><h2>Shop by category</h2></div>
         <div className="tiles">{Object.keys(menu).map((c) => <button key={c} className={`tile c-${c}`} onClick={() => go(c)}><Icon c={c} /><img className="bg" src={repOf(c)} alt="" loading="lazy" onError={hide} /><span>{c}</span></button>)}</div></section>
+      <section className="story">
+        <div className="story-txt"><span className="kicker">The {SHOP.name} promise</span><h2>Considered pieces for a beautiful home</h2><p>From soft luxury bedding to hand-finished stoneware, every piece is chosen for quality you can feel. Order easily, pay on delivery and exchange within 7 days.</p><button className="btn" onClick={() => go("All")}>Explore the collection</button></div>
+        <div className="story-img">{repOf("Decor") && <img src={repOf("Decor")} alt="" loading="lazy" onError={hide} />}</div>
+      </section>
       <section className="wrap sec"><div className="head"><h2>New arrivals</h2></div><div className="grid">{news.map((p) => <Card key={p.id} p={p} />)}</div></section>
       <section className="wrap sec"><div className="head"><h2>On sale</h2></div><div className="grid">{sales.map((p) => <Card key={p.id} p={p} />)}</div></section>
 
@@ -177,12 +192,12 @@ export default function Store({ products }) {
 
       <footer><div className="wrap">
         <div className="cols">
-          <div><b style={{ color: "var(--ink)", letterSpacing: ".22em", fontSize: 18 }}>FALESTIX</b><p>Women, men, kids and home essentials, delivered across Pakistan. Pay cash on delivery.</p></div>
+          <div><b>{SHOP.name.toUpperCase()}</b><p>Luxury bedding, home decor and kitchenware, delivered across Pakistan. Pay cash on delivery.</p></div>
           <div><h4>Shop</h4>{Object.keys(menu).map((c) => <button key={c} className="l" onClick={() => go(c)}>{c}</button>)}</div>
           <div><h4>Help</h4><a href="/shipping">Shipping</a><a href="/returns">Returns</a></div>
           <div><h4>Legal</h4><a href="/contact">Contact us</a><a href="/privacy">Privacy policy</a><a href="/terms">Terms</a></div>
         </div>
-        <p className="copy">© {new Date().getFullYear()} {SHOP.name} · {SHOP.domain} · All prices in Pakistani rupees.</p>
+        <p className="copy">© {new Date().getFullYear()} {SHOP.name} · All prices in Pakistani rupees.</p>
       </div></footer>
 
       {view && (
@@ -224,7 +239,10 @@ export default function Store({ products }) {
               <h2>Thank you for your order</h2>
               <p>Order <b>{order.id}</b> is confirmed. We will call you shortly to confirm your order.</p>
               <p>Please pay <b>{money(order.total)}</b> in cash to the rider on delivery.</p>
-              {SHOP.whatsapp && <a className="btn" target="_blank" rel="noopener" href={`https://wa.me/${SHOP.whatsapp}?text=${encodeURIComponent(order.summary)}`}>Send order on WhatsApp</a>}
+              {SHOP.whatsapp && (<>
+                <p className="small">WhatsApp did not open? Tap the button and press send, so we get your order details right away.</p>
+                <a className="btn wa" target="_blank" rel="noopener" href={`https://wa.me/${SHOP.whatsapp}?text=${encodeURIComponent(order.summary)}`}>Send order on WhatsApp</a>
+              </>)}
             </div></div>
             <div className="df"><button className="cta" style={{ marginTop: 0 }} onClick={close}>Continue shopping</button></div>
           </>)}
